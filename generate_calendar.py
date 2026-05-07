@@ -884,6 +884,35 @@ def generate_calendar():
             font-style: italic;
         }}
 
+
+        /* Fullscreen Button */
+        #fullscreen-btn {{
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.5);
+            transition: all 0.3s ease;
+            outline: none;
+        }}
+        #fullscreen-btn:hover {{
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(59,130,246,0.7);
+        }}
+        #fullscreen-btn title-tooltip {{
+            display: none;
+        }}
         /* ======== PRINT / PDF STYLES ======== */
         #print-container {{
             display: none;
@@ -957,12 +986,12 @@ def generate_calendar():
         }}
     </style>
 </head>
-<body data-theme="dark">
+<body data-theme="light">
 
     <div class="theme-toggle-container">
         <span class="theme-label">Dark</span>
         <label class="switch">
-            <input type="checkbox" id="theme-toggle">
+            <input type="checkbox" id="theme-toggle" checked>
             <span class="slider"></span>
         </label>
         <span class="theme-label">Light</span>
@@ -1032,6 +1061,11 @@ def generate_calendar():
             </div>
     </div>
 
+
+    <!-- Fullscreen Button -->
+    <a id="fullscreen-btn" href="javascript:void(0)" onclick="window.open(window.location.href,'_blank')" title="Open in Full Page">
+        <span>&#x2197;</span>
+    </a>
     <!-- Container for PDF Export (Print only) -->
     <div id="print-container" style="display: none;"></div>
 
@@ -1602,6 +1636,8 @@ def generate_calendar():
                 renderCalendar();
             }}
         }});
+
+
 
         // Initial render
         renderCalendar();
