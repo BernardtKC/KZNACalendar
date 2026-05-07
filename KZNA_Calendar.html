@@ -1106,13 +1106,13 @@
                 <div id="modal-share-content" style="background: var(--bg-grad-2); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color);">
                     <div style="border-left: 8px solid ${color}; padding-left: 1.5rem;">
                         <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
-                            <img src="${document.querySelector('.kzna-logo').src}" style="height: 40px; width: auto;">
+                            <img src="${document.querySelector('.kzna-logo') ? document.querySelector('.kzna-logo').src : ''}" style="height: 40px; width: auto;">
                             <span style="font-weight: 700; color: var(--text-muted); font-size: 0.9rem;">KZNA EVENTS</span>
                         </div>
-                        <h2 class="modal-title" style="border:none; margin-bottom: 0.5rem; font-size: 1.8rem;">${eventData.name}</h2>
-                        <div style="color: var(--primary-color); font-weight: 700; margin-bottom: 1.5rem; font-size: 1.2rem;">${dateRangeText}</div>
+                        <h2 class="modal-title" style="border:none; margin-bottom: 0.5rem; font-size: 1.6rem; line-height: 1.2;">${eventData.name}</h2>
+                        <div style="color: var(--primary-color); font-weight: 700; margin-bottom: 1rem; font-size: 1.1rem;">${dateRangeText}</div>
                         
-                        <div class="event-meta" style="flex-direction: column; gap: 1rem; margin-bottom: 1rem; font-size: 1.1rem;">
+                        <div class="event-meta" style="flex-direction: column; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 1rem;">
                             ${eventData.venue ? `<div style="display:flex; align-items:center; gap:0.5rem"><span>📍</span> <strong>Venue:</strong> ${eventData.venue}</div>` : ''}
                             ${eventData.host ? `<div style="display:flex; align-items:center; gap:0.5rem"><span>🏢</span> <strong>Host:</strong> ${eventData.host}</div>` : ''}
                             <div style="display:flex; align-items:center; gap:0.5rem"><span>🏷️</span> <strong>Level:</strong> ${eventData.level || 'Event'}</div>
@@ -1120,13 +1120,14 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
-                    <button class="btn" style="background: var(--primary-color); color: white;" 
+                <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <button class="btn" style="background: var(--primary-color); color: white; padding: 0.8rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" 
                         onclick="downloadICS('${eventData.name.replace(/'/g, "\'")}', '${eventData.startDate}', '${eventData.endDate}', '${eventData.venue ? eventData.venue.replace(/'/g, "\'") : ''}', '${eventData.host ? eventData.host.replace(/'/g, "\'") : ''}')">
-                        📅 Add to Calendar
+                        <span>📅</span> Add to Calendar
                     </button>
-                    <button class="btn" onclick="shareEvent('${eventData.name.replace(/'/g, "\'")}', '${dateRangeText}', '${eventData.venue ? eventData.venue.replace(/'/g, "\'") : ''}')">
-                        📸 Share as Image
+                    <button class="btn" style="padding: 0.8rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--btn-bg); border: 1px solid var(--primary-color);" 
+                        onclick="shareEvent('${eventData.name.replace(/'/g, "\'")}', '${dateRangeText}', '${eventData.venue ? eventData.venue.replace(/'/g, "\'") : ''}')">
+                        <span>📸</span> Share as Image
                     </button>
                 </div>
             `;
@@ -1234,25 +1235,35 @@
             });
             
             if (dayEvents.length === 0) return;
+
+            // If only one event, open detailed modal directly with share/calendar options
+            if (dayEvents.length === 1) {
+                openEventModal(dayEvents[0]);
+                return;
+            }
             
             const modalBody = document.getElementById('modal-body');
             const d = new Date(dateStr);
             const dateTitle = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
             
             let html = `<h2 class="modal-title">${dateTitle}</h2>`;
+            html += `<p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Tap an event for share & calendar options:</p>`;
             
             dayEvents.forEach(e => {
                 const color = getLevelColor(e.level);
                 html += `
-                    <div class="event-card" style="--primary-color: ${color}; margin-bottom: 1rem; grid-template-columns: 1fr;">
+                    <div class="event-card" style="--primary-color: ${color}; margin-bottom: 1rem; grid-template-columns: 1fr; cursor: pointer; padding: 1rem;" onclick="openEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})">
                         <div class="event-details">
-                            <h3 style="margin-top: 0;">${e.name}</h3>
-                            <div class="event-meta">
+                            <h3 style="margin-top: 0; font-size: 1.1rem;">${e.name}</h3>
+                            <div class="event-meta" style="font-size: 0.9rem;">
                                 ${e.venue ? `<span>📍 ${e.venue}</span>` : ''}
                                 ${e.host ? `<span>🏢 ${e.host}</span>` : ''}
                             </div>
-                            <div class="event-level-badge" style="color: ${color}; border: 1px solid ${color}; margin-top: 0.5rem; display: inline-block;">
-                                ${e.level || 'Event'}
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <div class="event-level-badge" style="color: ${color}; border: 1px solid ${color}; margin-top: 0; display: inline-block; font-size: 0.7rem; padding: 2px 6px;">
+                                    ${e.level || 'Event'}
+                                </div>
+                                <span style="font-size: 0.7rem; color: var(--primary-color); font-weight: 600;">Details & Share →</span>
                             </div>
                         </div>
                     </div>
